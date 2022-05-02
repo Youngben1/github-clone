@@ -4,12 +4,17 @@ import Image from 'next/image'
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import Feed from "../components/Feed"
-import { useSession, getSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import Login from "../components/Login"
+import { useGetUserQuery } from '../redux/features/user/user-api-slice'
+import { useSelector } from "react-redux"
+import { RootState } from '../redux/store'
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
- if (!session) return <Login />
+  const {data: userData, error, isLoading } = useGetUserQuery('')
+  const token = useSelector((state: RootState) => state.user.token)
+
+ if (!token) return <Login />
 
   return (
     <div>
@@ -21,8 +26,7 @@ const Home: NextPage = () => {
       <Header />
 
       <main className="flex border-b">
-         
-          <Sidebar />
+          <Sidebar userData={userData} />
           <Feed />
       </main>
     </div>
@@ -30,13 +34,3 @@ const Home: NextPage = () => {
 }
 
 export default Home
-
-export async function getServerSideProps() {
-  const session = await getSession();
-
-  return {
-    props: {
-      session
-    }
-  }
-}
